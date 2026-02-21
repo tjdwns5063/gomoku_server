@@ -1,0 +1,1 @@
+void WorkerThreadMain(HANDLE hIOCP);
