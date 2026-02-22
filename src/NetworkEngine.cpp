@@ -77,7 +77,7 @@ int NetworkEngine::listen()
 int NetworkEngine::recv(Session* session) {
 	DWORD recvBytes = 0;
 	DWORD flags = 0;
-	OVERLAPPED_EX* ioContext = session->getOverlapped();
+	OVERLAPPED_EX* ioContext = session->getRecvContext();
 	CreateIoCompletionPort((HANDLE)session->getSocket(), hIOCP, (ULONG_PTR)session, 0);
 
 	return WSARecv(session->getSocket(), &(ioContext->wsaBuf), 1, &recvBytes, &flags, &(ioContext->overlapped), NULL);
@@ -90,5 +90,5 @@ Session* NetworkEngine::accept() {
 		return nullptr;
 	}
 
-	return new Session(sessionIdGenerator.generateId(), clientSocket, IO_TYPE::RECV);
+	return new Session(sessionIdGenerator.generateId(), clientSocket);
 }

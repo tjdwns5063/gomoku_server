@@ -1,9 +1,9 @@
 #include "Packet.h"
 #include "Session.h"
 
-std::unordered_map<PacketID, void(*)(const char* buffer, size_t size)> PacketHandler::handlers;
+std::unordered_map<PacketID, void(*)(Session* session, const char* buffer, size_t size)> PacketHandler::handlers;
 
-void testHandler(const char* buffer, size_t size) {
+void testHandler(Session* session, const char* buffer, size_t size) {
 	PKT_C2S_ReqPlaceStone* pkt = reinterpret_cast<PKT_C2S_ReqPlaceStone*>(const_cast<char*>(buffer));
 
 	std::cout << std::format("id: {}", pkt->header.id) << "\n";
@@ -12,6 +12,14 @@ void testHandler(const char* buffer, size_t size) {
 	std::cout << std::format("y: {}", static_cast<int>(pkt->y)) << "\n";
 	std::cout << std::format("color: {}", static_cast<int>(pkt->color)) << "\n";
 
+	struct PKT_S2C_RES_PLACE_STONE res {};
+
+	res.header.id = PacketID::S2C_RES_PLACE_STONE; // 1001
+	res.header.size = sizeof(PKT_S2C_RES_PLACE_STONE); // 6byte
+	res.status = StatusCode::SUCCESS; // 0
+	//06 00 EA 03 00 00
+
+	session->send(reinterpret_cast<char*>(&res), sizeof(res));
 }
 
 void PacketHandler::initRoutes() {
@@ -19,7 +27,7 @@ void PacketHandler::initRoutes() {
 	//PacketHandler::addHandler(1002, OmokController::handleEnterRoom);
 }
 
-void PacketHandler::addHandler(PacketID id, void(*handler)(const char* buffer, size_t size)) {
+void PacketHandler::addHandler(PacketID id, void(*handler)(Session* session, const char* buffer, size_t size)) {
 	handlers[id] = handler;
 }
 
@@ -29,7 +37,7 @@ void PacketHandler::dispatch(Session* session, const char* buffer, size_t size) 
 	auto it = handlers.find(static_cast<PacketID>(header->id));
 
 	if (it != handlers.end()) {
-		it->second(buffer, size);
+		it->second(session, buffer, size);
 	}
 	else {
 		session->disconnect();

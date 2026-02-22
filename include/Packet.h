@@ -20,7 +20,7 @@ enum class StoneColor : uint8_t {
     WHITE = 2
 };
 
-enum class ErrorCode : int16_t {
+enum class StatusCode : int16_t {
     SUCCESS = 0,
     NOT_YOUR_TURN = 1,
     INVALID_POSITION = 2,
@@ -42,9 +42,7 @@ struct PKT_C2S_ReqPlaceStone {
 
 struct PKT_S2C_RES_PLACE_STONE {
     PacketHeader header;
-    int8_t x;
-    int8_t y;
-    StoneColor color;
+	StatusCode status;
 };
 
 #pragma pack(pop)
@@ -52,8 +50,8 @@ struct PKT_S2C_RES_PLACE_STONE {
 class PacketHandler
 {
 private:
-    static std::unordered_map<PacketID, void(*)(const char* buffer, size_t size)> handlers;
-    static void addHandler(PacketID id, void(*handler)(const char* buffer, size_t size));
+    static std::unordered_map<PacketID, void(*)(Session* session, const char* buffer, size_t size)> handlers;
+    static void addHandler(PacketID id, void(*handler)(Session* session, const char* buffer, size_t size));
 
 public:
     static void initRoutes();

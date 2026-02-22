@@ -36,9 +36,6 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 			// [패킷 처리]
 			pSession->onRecv(bytesTransferred);
 
-			// [Send 처리]
-			
-
 			// [다음 Recv 재등록]
 			ZeroMemory(&pIoContext->overlapped, sizeof(WSAOVERLAPPED));
 
@@ -53,11 +50,9 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 					closesocket(pSession->getSocket());
 				}
 			}
-
 		}
 		else if (pIoContext->ioType == IO_TYPE::SEND) {
 			// WSASend의 비동기 작업이 완료되어 GQCS가 깨어난 경우
-			// 송신이 완료되었으므로 동적 할당했던 Send용 컨텍스트를 메모리에서 해제
 			printf("Worker Thread: sent %d bytes\n", bytesTransferred);
 			//delete pIoContext;
 		}

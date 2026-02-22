@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <cstdint>
 #include "RecvBuffer.h"
+#include "SendQueue.h"
 
 #define DEFAULT_BUFLEN 1024
 
@@ -20,25 +21,29 @@ struct OVERLAPPED_EX {
 
 class Session {
 private:
-    OVERLAPPED_EX overlapped;
+    OVERLAPPED_EX recvContext;
+    OVERLAPPED_EX sendContext;
     uint64_t sessionId;
     SOCKET socket;
     uint64_t userId;
     bool isAuth;
-    RecvBuffer recvBuffer{65536};
+    SendQueue sendQueue;
+    RecvBuffer recvBuffer{ 65536 };
 
 public:
-    Session(uint64_t id, SOCKET sock, IO_TYPE ioType);
+    Session(uint64_t id, SOCKET sock);
     ~Session();
 
     uint64_t getSessionId() const;
     SOCKET getSocket() const;
     bool isAuthenticated() const;
     uint64_t getUserId() const;
-    OVERLAPPED_EX* getOverlapped();
+    OVERLAPPED_EX* getRecvContext();
+    OVERLAPPED_EX* getSendContext();
 
     void authenticate(uint64_t userId);
     void disconnect();
     int recv(HANDLE hIOCP);
     void onRecv(int transferredBytes);
+	void send(char* data, size_t len);
 };

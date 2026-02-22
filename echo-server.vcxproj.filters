@@ -27,13 +27,19 @@
     <ClCompile Include="src\NetworkEngine.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="src\Packet.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
     <ClCompile Include="src\RecvBuffer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="src\Session.cpp">
+    <ClCompile Include="src\SendBuffer.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Packet.cpp">
+    <ClCompile Include="src\SendQueue.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Session.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -51,6 +57,12 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="include\RecvBuffer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SendBuffer.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="include\SendQueue.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="include\Session.h">

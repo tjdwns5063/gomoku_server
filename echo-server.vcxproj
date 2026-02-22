@@ -18,6 +18,27 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\IdGenerator.cpp" />
+    <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\main_back.cpp" />
+    <ClCompile Include="src\NetworkEngine.cpp" />
+    <ClCompile Include="src\Packet.cpp" />
+    <ClCompile Include="src\RecvBuffer.cpp" />
+    <ClCompile Include="src\SendBuffer.cpp" />
+    <ClCompile Include="src\SendQueue.cpp" />
+    <ClCompile Include="src\Session.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\IdGenerator.h" />
+    <ClInclude Include="include\main.h" />
+    <ClInclude Include="include\NetworkEngine.h" />
+    <ClInclude Include="include\Packet.h" />
+    <ClInclude Include="include\RecvBuffer.h" />
+    <ClInclude Include="include\SendBuffer.h" />
+    <ClInclude Include="include\SendQueue.h" />
+    <ClInclude Include="include\Session.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>18.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
@@ -129,23 +150,6 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Packet.cpp" />
-    <ClCompile Include="src\IdGenerator.cpp" />
-    <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\main_back.cpp" />
-    <ClCompile Include="src\NetworkEngine.cpp" />
-    <ClCompile Include="src\RecvBuffer.cpp" />
-    <ClCompile Include="src\Session.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="include\IdGenerator.h" />
-    <ClInclude Include="include\main.h" />
-    <ClInclude Include="include\NetworkEngine.h" />
-    <ClInclude Include="include\Packet.h" />
-    <ClInclude Include="include\RecvBuffer.h" />
-    <ClInclude Include="include\Session.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

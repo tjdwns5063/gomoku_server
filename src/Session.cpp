@@ -1,10 +1,13 @@
 #include "Session.h"
 #include "Packet.h"
+#include <memory>
 
-Session::Session(uint64_t id, SOCKET sock, IO_TYPE ioType): 
-    sessionId(id), socket(sock), userId(0), isAuth(false) {
-	ZeroMemory(&overlapped, sizeof(OVERLAPPED_EX));
-	overlapped.ioType = ioType;
+Session::Session(uint64_t id, SOCKET sock): 
+    sessionId(id), socket(sock), userId(0), isAuth(false), sendQueue(SendQueue(this)) {
+	ZeroMemory(&recvContext, sizeof(OVERLAPPED_EX));
+    ZeroMemory(&sendContext, sizeof(OVERLAPPED_EX));
+	recvContext.ioType = IO_TYPE::RECV;
+    sendContext.ioType = IO_TYPE::SEND;
 }
 
 Session::~Session() {
@@ -15,7 +18,8 @@ uint64_t Session::getSessionId() const { return sessionId; }
 SOCKET Session::getSocket() const { return socket; }
 bool Session::isAuthenticated() const { return isAuth; }
 uint64_t Session::getUserId() const { return userId; }
-OVERLAPPED_EX* Session::getOverlapped() { return &overlapped; }
+OVERLAPPED_EX* Session::getRecvContext() { return &recvContext; }
+OVERLAPPED_EX* Session::getSendContext() { return &sendContext; }
 
 void Session::authenticate(uint64_t userId) {
     userId = userId;
@@ -67,17 +71,28 @@ void Session::onRecv(int transferredBytes) {
 int Session::recv(HANDLE hIOCP) {
     recvBuffer.clean();
 
-    ZeroMemory(&overlapped.overlapped, sizeof(WSAOVERLAPPED));
-    overlapped.ioType = IO_TYPE::RECV;
+    ZeroMemory(&recvContext.overlapped, sizeof(WSAOVERLAPPED));
+    recvContext.ioType = IO_TYPE::RECV;
 
     // 핵심: WSABUF가 가리키는 곳을 RecvBuffer의 실제 빈 공간으로 직접 지정
-    overlapped.wsaBuf.buf = recvBuffer.getWritePtr();
-    overlapped.wsaBuf.len = recvBuffer.getFreeSize();
+    recvContext.wsaBuf.buf = recvBuffer.getWritePtr();
+    recvContext.wsaBuf.len = recvBuffer.getFreeSize();
 
     DWORD recvBytes = 0;
     DWORD flags = 0;
-    OVERLAPPED_EX* ioContext = getOverlapped();
+    OVERLAPPED_EX* ioContext = getRecvContext();
     CreateIoCompletionPort((HANDLE)getSocket(), hIOCP, (ULONG_PTR)this, 0);
 
     return WSARecv(getSocket(), &(ioContext->wsaBuf), 1, &recvBytes, &flags, &(ioContext->overlapped), NULL);
+}
+
+void Session::send(char* data, size_t len) {
+    std::shared_ptr<SendBuffer> pSendBuffer = 
+        std::make_shared<SendBuffer>(len);
+
+    pSendBuffer->write(data, len);
+	
+    sendQueue.enqueue(pSendBuffer);
+
+    return;
 }
