@@ -130,6 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Packet.cpp" />
     <ClCompile Include="src\IdGenerator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\main_back.cpp" />

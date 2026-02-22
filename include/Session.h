@@ -3,7 +3,6 @@
 #include <WinSock2.h>
 #include <windows.h>
 #include <cstdint>
-#include "Packet.h"
 #include "RecvBuffer.h"
 
 #define DEFAULT_BUFLEN 1024

@@ -1,8 +1,9 @@
 #include "NetworkEngine.h"
+#include "Packet.h"
 #include <vector>
 #include <thread>
 
-void WorkerThreadMain(HANDLE hIOCP) {
+static void WorkerThreadMain(HANDLE hIOCP) {
 	DWORD bytesTransferred = 0;
 	Session* pSession = nullptr; // Per-Socket Data (CompletionKey)
 	WSAOVERLAPPED* pOverlapped = nullptr;
@@ -63,9 +64,9 @@ void WorkerThreadMain(HANDLE hIOCP) {
 	}
 }
 
-
 int main() {
 	NetworkEngine* networkEngine = new NetworkEngine();
+	PacketHandler::initRoutes();
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	std::vector<std::thread> workerThreads;

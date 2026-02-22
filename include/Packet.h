@@ -1,12 +1,30 @@
 #pragma once
 
 #include <cstdint>
+#include <unordered_map>
+#include <format>
+#include <iostream>
 
 #pragma pack(push, 1)
+
+class Session;
 
 struct PacketHeader {
     uint16_t size;
     uint16_t id;
+};
+
+enum class StoneColor : uint8_t {
+    NONE = 0,
+    BLACK = 1,
+    WHITE = 2
+};
+
+enum class ErrorCode : int16_t {
+    SUCCESS = 0,
+    NOT_YOUR_TURN = 1,
+    INVALID_POSITION = 2,
+    // ...
 };
 
 enum PacketID : uint16_t {
@@ -17,8 +35,28 @@ enum PacketID : uint16_t {
 
 struct PKT_C2S_ReqPlaceStone {
     PacketHeader header;
-    int16_t x;
-    int16_t y;
+    int8_t x;
+    int8_t y;
+    StoneColor color;
+};
+
+struct PKT_S2C_RES_PLACE_STONE {
+    PacketHeader header;
+    int8_t x;
+    int8_t y;
+    StoneColor color;
 };
 
 #pragma pack(pop)
+
+class PacketHandler
+{
+private:
+    static std::unordered_map<PacketID, void(*)(const char* buffer, size_t size)> handlers;
+    static void addHandler(PacketID id, void(*handler)(const char* buffer, size_t size));
+
+public:
+    static void initRoutes();
+	static void dispatch(Session* session, const char* buffer, size_t size);
+};
+
