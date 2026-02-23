@@ -22,10 +22,7 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 
 		//세션 종료 처리
 		if (result == 0 || bytesTransferred == 0) {
-			std::cerr << "Client disconnected or error: " << GetLastError() << std::endl;
-			closesocket(pSession->getSocket());
-			delete pSession;
-			//if (pIoContext) delete pIoContext; // 누수 방지
+			pSession->disconnect();
 			continue;
 		}
 
@@ -47,14 +44,12 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 				int error = WSAGetLastError();
 				if (error != WSA_IO_PENDING) {
 					printf("WSARecv 재등록 실패: %d\n", error);
-					closesocket(pSession->getSocket());
+					pSession->disconnect();
 				}
 			}
 		}
 		else if (pIoContext->ioType == IO_TYPE::SEND) {
-			// WSASend의 비동기 작업이 완료되어 GQCS가 깨어난 경우
-			printf("Worker Thread: sent %d bytes\n", bytesTransferred);
-			//delete pIoContext;
+			pSession->onSend(bytesTransferred);
 		}
 	}
 }

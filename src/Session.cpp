@@ -1,9 +1,10 @@
-#include "Session.h"
+﻿#include "Session.h"
 #include "Packet.h"
 #include <memory>
 
 Session::Session(uint64_t id, SOCKET sock): 
-    sessionId(id), socket(sock), userId(0), isAuth(false), sendQueue(SendQueue(this)) {
+    sessionId(id), socket(sock), userId(0), isAuth(false), 
+    isConnected(false), refCount(1), sendQueue(SendQueue(this)) {
 	ZeroMemory(&recvContext, sizeof(OVERLAPPED_EX));
     ZeroMemory(&sendContext, sizeof(OVERLAPPED_EX));
 	recvContext.ioType = IO_TYPE::RECV;
@@ -26,20 +27,34 @@ void Session::authenticate(uint64_t userId) {
     isAuth = true;
 }
 
-void Session::disconnect() {
-    if (socket != INVALID_SOCKET) {
-        closesocket(socket);
-        socket = INVALID_SOCKET;
+void Session::releaseRef() {
+    if (refCount.fetch_sub(1) == 1) {
+        std::cout << "All I/O is Disconnected. Release Reseource.\n";
+        delete this;
     }
+}
+
+void Session::disconnect() {
+	bool expected = true;
+    if (isConnected.compare_exchange_strong(expected, false)) {
+        // 최초로 연결이 끊긴 경우에만 소켓 닫기
+        if (socket != INVALID_SOCKET) {
+            closesocket(socket);
+            socket = INVALID_SOCKET;
+        }
+    }
+    
+    refCount.fetch_sub(1);
     isAuth = false;
     userId = 0;
+    releaseRef();
 }
 
 void Session::onRecv(int transferredBytes) {
     // 1. OS가 데이터를 버퍼에 직접 써주었으므로, 쓰기 포인터만 밀어줍니다.
     if (recvBuffer.onWrite(transferredBytes) == false) {
-        // 버퍼 초과 (악의적 공격 또는 서버 처리 지연)
         disconnect();
+		releaseRef();
         return;
     }
 
@@ -65,16 +80,18 @@ void Session::onRecv(int transferredBytes) {
 
         // 4. 처리한 패킷 크기만큼 읽기 포인터 이동
         recvBuffer.onRead(header->size);
+		refCount.fetch_sub(1);
     }
 }
 
 int Session::recv(HANDLE hIOCP) {
     recvBuffer.clean();
 
+    refCount.fetch_add(1);
+
     ZeroMemory(&recvContext.overlapped, sizeof(WSAOVERLAPPED));
     recvContext.ioType = IO_TYPE::RECV;
 
-    // 핵심: WSABUF가 가리키는 곳을 RecvBuffer의 실제 빈 공간으로 직접 지정
     recvContext.wsaBuf.buf = recvBuffer.getWritePtr();
     recvContext.wsaBuf.len = recvBuffer.getFreeSize();
 
@@ -87,6 +104,7 @@ int Session::recv(HANDLE hIOCP) {
 }
 
 void Session::send(char* data, size_t len) {
+    refCount.fetch_add(1);
     std::shared_ptr<SendBuffer> pSendBuffer = 
         std::make_shared<SendBuffer>(len);
 
@@ -95,4 +113,9 @@ void Session::send(char* data, size_t len) {
     sendQueue.enqueue(pSendBuffer);
 
     return;
+}
+
+void Session::onSend(int bytesTransferred) {
+    printf("Worker Thread: sent %d bytes\n", bytesTransferred);
+    refCount.fetch_sub(1);
 }

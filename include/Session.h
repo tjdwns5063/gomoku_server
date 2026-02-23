@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include <WinSock2.h>
 #include <windows.h>
 #include <cstdint>
+#include <atomic>
 #include "RecvBuffer.h"
 #include "SendQueue.h"
 
@@ -21,6 +22,8 @@ struct OVERLAPPED_EX {
 
 class Session {
 private:
+	std::atomic<bool> isConnected;
+    std::atomic<int> refCount;
     OVERLAPPED_EX recvContext;
     OVERLAPPED_EX sendContext;
     uint64_t sessionId;
@@ -46,4 +49,6 @@ public:
     int recv(HANDLE hIOCP);
     void onRecv(int transferredBytes);
 	void send(char* data, size_t len);
+    void onSend(int bytesTransferred);
+    void releaseRef();
 };
