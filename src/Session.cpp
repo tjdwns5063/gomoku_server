@@ -4,7 +4,8 @@
 
 Session::Session(uint64_t id, SOCKET sock): 
     sessionId(id), socket(sock), userId(0), isAuth(false), 
-    isConnected(false), refCount(1), sendQueue(SendQueue(this)) {
+    isConnected(false), refCount(1), sendQueue(SendQueue(this)), 
+    isMatching(false) {
 	ZeroMemory(&recvContext, sizeof(OVERLAPPED_EX));
     ZeroMemory(&sendContext, sizeof(OVERLAPPED_EX));
 	recvContext.ioType = IO_TYPE::RECV;
@@ -118,4 +119,16 @@ void Session::send(char* data, size_t len) {
 void Session::onSend(int bytesTransferred) {
     printf("Worker Thread: sent %d bytes\n", bytesTransferred);
     refCount.fetch_sub(1);
+}
+
+void Session::enterMatchQueue() {
+    isMatching.exchange(true);
+}
+
+void Session::leaveMatchQueue() {
+    isMatching.exchange(false);
+}
+
+bool Session::isMatch() const {
+    return isMatching.load();
 }

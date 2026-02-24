@@ -22,6 +22,7 @@
     <ClCompile Include="src\IdGenerator.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\main_back.cpp" />
+    <ClCompile Include="src\MatchQueue.cpp" />
     <ClCompile Include="src\NetworkEngine.cpp" />
     <ClCompile Include="src\Packet.cpp" />
     <ClCompile Include="src\RecvBuffer.cpp" />
@@ -32,6 +33,7 @@
   <ItemGroup>
     <ClInclude Include="include\IdGenerator.h" />
     <ClInclude Include="include\main.h" />
+    <ClInclude Include="include\MatchQueue.h" />
     <ClInclude Include="include\NetworkEngine.h" />
     <ClInclude Include="include\Packet.h" />
     <ClInclude Include="include\RecvBuffer.h" />
