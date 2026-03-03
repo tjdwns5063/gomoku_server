@@ -1,4 +1,4 @@
-#include "gtest/gtest.h"
+﻿#include "gtest/gtest.h"
 #include "OmokValidator.h"
 
 #pragma once
@@ -118,5 +118,34 @@ TEST(OmokRuleTest, CheckDownLeftWin) {
 	map[4][7] = 'B';
 	map[5][6] = 'B';
 	bool isWin = OmokValidator::isWin(map, 1, 10);
+	EXPECT_EQ(isWin, true);
+}
+
+TEST(OmokRuleTest, SixStoneFailure) {
+	auto map = emptyMap;
+
+	map[1][2] = 'B';
+	map[1][3] = 'B';
+	map[1][4] = 'B';
+	map[1][5] = 'B';
+	map[1][6] = 'B';
+	map[1][7] = 'B';
+
+	bool isWin = OmokValidator::isWin(map, 1, 2);
+
+	EXPECT_EQ(isWin, false);
+}
+
+TEST(OmokRuleTest, CheckMid) {
+	auto map = emptyMap;
+
+	map[1][2] = 'B';
+	map[1][3] = 'B';
+	map[1][4] = 'B';
+	map[1][5] = 'B';
+	map[1][6] = 'B';
+
+	bool isWin = OmokValidator::isWin(map, 1, 4);
+
 	EXPECT_EQ(isWin, true);
 }
