@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/솔루션 항목/" />
+  <Project Path="echo-server/echo-server.vcxproj" Id="656c5e1b-c6dd-4d6e-a07f-104e66013c04" />
+  <Project Path="omok-core/omok-core.vcxproj" Id="139c2e67-0653-4b71-9aab-e3d9519e567f" />
+  <Project Path="test/test.vcxproj" Id="f471a8b3-9c7f-48d6-87c4-5d37eff7fb29" />
+</Solution>
