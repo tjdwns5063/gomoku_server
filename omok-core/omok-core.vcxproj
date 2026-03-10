@@ -129,11 +129,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="include\GameRoom.h" />
+    <ClInclude Include="include\GameRoomConnector.h" />
+    <ClInclude Include="include\IdGenerator.h" />
     <ClInclude Include="include\OmokValidator.h" />
     <ClInclude Include="include\Player.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\GameRoom.cpp" />
+    <ClCompile Include="src\GameRoomConnector.cpp" />
+    <ClCompile Include="src\IdGenerator.cpp" />
     <ClCompile Include="src\OmokValidator.cpp" />
     <ClCompile Include="src\Player.cpp" />
   </ItemGroup>

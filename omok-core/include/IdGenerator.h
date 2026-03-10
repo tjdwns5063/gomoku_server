@@ -6,13 +6,13 @@
 class IdGenerator
 {
 private:
-	std::atomic<uint64_t> currentId;
+	std::atomic<uint32_t> currentId;
 
 public:
 	IdGenerator();
 	~IdGenerator();
 
-	uint64_t generateId();
-	uint64_t getCurrentId() const;
+	uint32_t generateId();
+	uint32_t getCurrentId() const;
 };
 
