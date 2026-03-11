@@ -22,37 +22,34 @@ struct OVERLAPPED_EX {
 
 class Session {
 private:
-    std::atomic<bool> isMatching; // TODO: 추후에 GameLayer로 이동
 	std::atomic<bool> isConnected;
     std::atomic<int> refCount; // TODO: 추후에 shared_ptr 구조로 변경
     OVERLAPPED_EX recvContext;
     OVERLAPPED_EX sendContext;
-    uint64_t sessionId;
+    uint32_t sessionId;
     SOCKET socket;
-    uint64_t userId;
+    uint32_t userId;
     bool isAuth;
     SendQueue sendQueue;
     RecvBuffer recvBuffer{ 65536 };
 
 public:
-    Session(uint64_t id, SOCKET sock);
+    Session(uint32_t id, SOCKET sock);
     ~Session();
 
-    uint64_t getSessionId() const;
+    uint32_t getSessionId() const;
     SOCKET getSocket() const;
     bool isAuthenticated() const;
-    uint64_t getUserId() const;
+    uint32_t getUserId() const;
     OVERLAPPED_EX* getRecvContext();
     OVERLAPPED_EX* getSendContext();
-    bool isMatch() const; // 현재 매치중인지 확인
 
-    void authenticate(uint64_t userId);
+    void authenticate(uint32_t userId);
     void disconnect();
     int recv(HANDLE hIOCP);
     void onRecv(int transferredBytes);
 	void send(char* data, size_t len);
     void onSend(int bytesTransferred);
     void releaseRef();
-	void enterMatchQueue(); // 매치 시작
-	void leaveMatchQueue(); // 매치 취소 
+	
 };

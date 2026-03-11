@@ -4,7 +4,7 @@
 #include <memory>
 #include <mutex>
 #include <utility>
-#include "Session.h"
+#include "Player.h"
 
 enum class MatchFlag: uint8_t {
 	WAITING = 0,
@@ -13,17 +13,17 @@ enum class MatchFlag: uint8_t {
 
 struct MatchInfo {
 	MatchFlag flag;
-	std::pair<Session*, Session*> matchedSessions;
+	std::pair<Player*, Player*> matchedSessions;
 };
 
 class MatchQueue
 {
 private:
-	std::deque<Session*> queue;
+	std::deque<Player*> queue;
 	std::mutex lock;
 
 public:
-	void enqueue(Session* session);
+	void enqueue(Player* session);
 	MatchInfo match();
 };
 

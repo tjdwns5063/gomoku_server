@@ -4,7 +4,7 @@
 std::unordered_map<PacketID, void(*)(Session* session, const char* buffer, size_t size)> PacketHandler::handlers;
 
 void testHandler(Session* session, const char* buffer, size_t size) {
-	PKT_C2S_ReqPlaceStone* pkt = reinterpret_cast<PKT_C2S_ReqPlaceStone*>(const_cast<char*>(buffer));
+	const PKT_C2S_ReqPlaceStone* pkt = reinterpret_cast<const PKT_C2S_ReqPlaceStone*>(buffer);
 
 	std::cout << std::format("id: {}", pkt->header.id) << "\n";
 	std::cout << std::format("size: {}", pkt->header.size) << "\n";
@@ -19,6 +19,22 @@ void testHandler(Session* session, const char* buffer, size_t size) {
 	res.status = StatusCode::SUCCESS; // 0
 	//06 00 EA 03 00 00
 
+	session->send(reinterpret_cast<char*>(&res), sizeof(res));
+}
+
+void matchHandler(Session* session, const char* buffer, size_t size) {
+	const PKT_C2S_ReqMatch* pkt = reinterpret_cast<const PKT_C2S_ReqMatch*>(buffer);
+
+	std::cout << std::format("id: {}", pkt->header.id) << "\n";
+	std::cout << std::format("size: {}", pkt->header.size) << "\n";
+	std::cout << std::format("userId: {}", pkt->userId) << "\n";
+
+	struct PKT_S2C_ResMatch res {};
+	
+	res.header.id = PacketID::S2C_RES_MATCH; // 1004
+	res.header.size = sizeof(PKT_S2C_ResMatch); // 6byte
+	res.status = StatusCode::SUCCESS; // 0
+	
 	session->send(reinterpret_cast<char*>(&res), sizeof(res));
 }
 

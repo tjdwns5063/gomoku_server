@@ -1,6 +1,6 @@
 #include "MatchQueue.h"
 
-void MatchQueue::enqueue(Session* session) {
+void MatchQueue::enqueue(Player* session) {
 	{
 		std::lock_guard<std::mutex> guard(lock);
 		session->enterMatchQueue();
@@ -10,7 +10,7 @@ void MatchQueue::enqueue(Session* session) {
 }
 
 MatchInfo MatchQueue::match() {
-	Session* waitSession[2] = { nullptr, };
+	Player* waitPlayer[2] = { nullptr, };
 
 	{
 		std::lock_guard<std::mutex> guard(lock);
@@ -22,26 +22,26 @@ MatchInfo MatchQueue::match() {
 		int count = 0;
 
 		while (!queue.empty() && count < 2) {
-			Session* session = queue.front();
+			Player* player = queue.front();
 			
-			if (session->isMatch()) {
-				waitSession[count] = session;
+			if (player->isMatch()) {
+				waitPlayer[count] = player;
 				++count;
 			}
 			queue.pop_front();
 		}
 
 		if (count < 2) {
-			if (waitSession[0] != nullptr) {
-				queue.push_front(waitSession[0]);
+			if (waitPlayer[0] != nullptr) {
+				queue.push_front(waitPlayer[0]);
 			}
 			return { MatchFlag::WAITING, std::pair(nullptr, nullptr) };
 		}
 
-		waitSession[0]->leaveMatchQueue();
-		waitSession[1]->leaveMatchQueue();
+		waitPlayer[0]->leaveMatchQueue();
+		waitPlayer[1]->leaveMatchQueue();
 	}
 	
-	return { MatchFlag::MATCHED, std::pair(waitSession[0], waitSession[1]) };
+	return { MatchFlag::MATCHED, std::pair(waitPlayer[0], waitPlayer[1]) };
 
 }

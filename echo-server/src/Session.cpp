@@ -2,10 +2,9 @@
 #include "Packet.h"
 #include <memory>
 
-Session::Session(uint64_t id, SOCKET sock): 
+Session::Session(uint32_t id, SOCKET sock): 
     sessionId(id), socket(sock), userId(0), isAuth(false), 
-    isConnected(false), refCount(1), sendQueue(SendQueue(this)), 
-    isMatching(false) {
+    isConnected(false), refCount(1), sendQueue(SendQueue(this)) {
 	ZeroMemory(&recvContext, sizeof(OVERLAPPED_EX));
     ZeroMemory(&sendContext, sizeof(OVERLAPPED_EX));
 	recvContext.ioType = IO_TYPE::RECV;
@@ -16,14 +15,14 @@ Session::~Session() {
     disconnect();
 }
 
-uint64_t Session::getSessionId() const { return sessionId; }
+uint32_t Session::getSessionId() const { return sessionId; }
 SOCKET Session::getSocket() const { return socket; }
 bool Session::isAuthenticated() const { return isAuth; }
-uint64_t Session::getUserId() const { return userId; }
+uint32_t Session::getUserId() const { return userId; }
 OVERLAPPED_EX* Session::getRecvContext() { return &recvContext; }
 OVERLAPPED_EX* Session::getSendContext() { return &sendContext; }
 
-void Session::authenticate(uint64_t userId) {
+void Session::authenticate(uint32_t userId) {
     userId = userId;
     isAuth = true;
 }
@@ -121,14 +120,3 @@ void Session::onSend(int bytesTransferred) {
     refCount.fetch_sub(1);
 }
 
-void Session::enterMatchQueue() {
-    isMatching.exchange(true);
-}
-
-void Session::leaveMatchQueue() {
-    isMatching.exchange(false);
-}
-
-bool Session::isMatch() const {
-    return isMatching.load();
-}

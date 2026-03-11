@@ -1,9 +1,10 @@
 #include "NetworkEngine.h"
 #include "Packet.h"
+#include "MatchQueue.h"
 #include <vector>
 #include <thread>
 
-static void WorkerThreadMain(HANDLE hIOCP) {
+static void WorkerThreadMain(HANDLE hIOCP, IdGenerator* userIdGen) {
 	DWORD bytesTransferred = 0;
 	Session* pSession = nullptr; // Per-Socket Data (CompletionKey)
 	WSAOVERLAPPED* pOverlapped = nullptr;
@@ -30,6 +31,11 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 		if (pIoContext->ioType == IO_TYPE::RECV) {
 			printf("Worker Thread: received %d bytes\n", bytesTransferred);
 
+			//임시 인증
+			if (!pSession->isAuthenticated()) {
+				pSession->authenticate(userIdGen->generateId()); // TODO: 실제 인증 로직으로 대체
+			}
+
 			// [패킷 처리]
 			pSession->onRecv(bytesTransferred);
 
@@ -54,19 +60,29 @@ static void WorkerThreadMain(HANDLE hIOCP) {
 	}
 }
 
+static void MatchmakingThreadMain(MatchQueue* matchQueue) {
+	
+	while (true) {
+		matchQueue->match();
+	}
+
+}
+
 int main() {
 	NetworkEngine* networkEngine = new NetworkEngine();
 	PacketHandler::initRoutes();
 	SYSTEM_INFO sysInfo;
 	GetSystemInfo(&sysInfo);
 	std::vector<std::thread> workerThreads;
-
+	std::shared_ptr<MatchQueue> matchQueue = std::make_shared<MatchQueue>();
+	IdGenerator* userIdGen = new IdGenerator();
 
 	networkEngine->ready();
 	printf("Echo Server started on port %s\n", DEFAULT_PORT);
 	for (DWORD i = 0; i < sysInfo.dwNumberOfProcessors * 2; ++i) {
-		workerThreads.emplace_back(WorkerThreadMain, networkEngine->getHIOCP());
+		workerThreads.emplace_back(WorkerThreadMain, networkEngine->getHIOCP(), userIdGen);
 	}
+	workerThreads.emplace_back(MatchmakingThreadMain, matchQueue.get());
 
 	while (true) {
 		// 4. 메인 스레드는 접속(Accept)만 전담합니다.
