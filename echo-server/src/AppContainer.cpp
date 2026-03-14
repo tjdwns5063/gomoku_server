@@ -6,6 +6,7 @@
 #include "IdGenerator.h"
 #include "Packet.h"
 #include "Session.h"
+#include "MatchController.h"
 #include <vector>
 #include <thread>
 
@@ -89,7 +90,8 @@ static void MatchmakingThreadMain(std::shared_ptr<MatchQueue> matchQueue) {
 AppContainer::AppContainer(): playerRepository(std::make_shared<PlayerRepository>()),
 	sessionManager(std::make_shared<SessionManager>()), matchQueue(std::make_shared<MatchQueue>()), 
 	networkEngine(std::make_shared<NetworkEngine>()), sessionIdGen(std::make_shared<IdGenerator>()), 
-	playerIdGen(std::make_shared<IdGenerator>()) {}
+	playerIdGen(std::make_shared<IdGenerator>()), 
+	matchController(std::make_shared<MatchController>(sessionManager, playerRepository, matchQueue)) {}
 
 void AppContainer::run() {
 	SYSTEM_INFO sysInfo;
@@ -97,33 +99,8 @@ void AppContainer::run() {
 	std::vector<std::thread> workerThreads;
 	networkEngine->ready();
 	printf("Echo Server started on port %s\n", DEFAULT_PORT);
-	std::shared_ptr<MatchQueue>& matchQueue = this->matchQueue;
-	std::shared_ptr<SessionManager>& sessionManager = this->sessionManager;
-	std::shared_ptr<PlayerRepository>& playerRepository = this->playerRepository;
 
-	PacketHandler::addHandler(PacketID::C2S_REQ_MATCH, [matchQueue, sessionManager, playerRepository](Session* s, const char* buf, size_t size) {
-		const PKT_C2S_ReqMatch* pkt = reinterpret_cast<const PKT_C2S_ReqMatch*>(buf);
-
-		std::cout << std::format("id: {}", pkt->header.id) << "\n";
-		std::cout << std::format("size: {}", pkt->header.size) << "\n";
-		std::cout << std::format("userId: {}", pkt->userId) << "\n";
-
-		uint32_t playerId = sessionManager->findPlayerIdBySessionId(s->getSessionId());
-		std::shared_ptr<Player> player = playerRepository->findById(playerId);
-
-		matchQueue->enqueue(player.get());
-
-		struct PKT_S2C_ResMatch res {};
-
-		res.header.id = PacketID::S2C_RES_MATCH; // 1004
-		res.header.size = sizeof(PKT_S2C_ResMatch); // 6byte
-		res.status = StatusCode::SUCCESS; // 0
-
-		s->send(reinterpret_cast<char*>(&res), sizeof(res));
-
-		return;
-		});
-
+	matchController->registerHandlers();
 
 	for (DWORD i = 0; i < sysInfo.dwNumberOfProcessors * 2; ++i) {
 		workerThreads.emplace_back(WorkerThreadMain, networkEngine->getHIOCP(), sessionIdGen,
