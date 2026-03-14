@@ -1,7 +1,7 @@
 #include "Packet.h"
 #include "Session.h"
 
-std::unordered_map<PacketID, void(*)(Session* session, const char* buffer, size_t size)> PacketHandler::handlers;
+std::unordered_map<PacketID, PacketHandler::HandlerFunc> PacketHandler::handlers;
 
 void testHandler(Session* session, const char* buffer, size_t size) {
 	const PKT_C2S_ReqPlaceStone* pkt = reinterpret_cast<const PKT_C2S_ReqPlaceStone*>(buffer);
@@ -43,7 +43,7 @@ void PacketHandler::initRoutes() {
 	//PacketHandler::addHandler(1002, OmokController::handleEnterRoom);
 }
 
-void PacketHandler::addHandler(PacketID id, void(*handler)(Session* session, const char* buffer, size_t size)) {
+void PacketHandler::addHandler(PacketID id, HandlerFunc handler) {
 	handlers[id] = handler;
 }
 

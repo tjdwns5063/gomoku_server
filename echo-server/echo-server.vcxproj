@@ -27,6 +27,7 @@
     <ClCompile Include="src\SendBuffer.cpp" />
     <ClCompile Include="src\SendQueue.cpp" />
     <ClCompile Include="src\Session.cpp" />
+    <ClCompile Include="src\SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\main.h" />
@@ -36,6 +37,7 @@
     <ClInclude Include="include\SendBuffer.h" />
     <ClInclude Include="include\SendQueue.h" />
     <ClInclude Include="include\Session.h" />
+    <ClInclude Include="include\SessionManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\omok-core\omok-core.vcxproj">

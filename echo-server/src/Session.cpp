@@ -3,7 +3,7 @@
 #include <memory>
 
 Session::Session(uint32_t id, SOCKET sock): 
-    sessionId(id), socket(sock), userId(0), isAuth(false), 
+    sessionId(id), socket(sock), userId(0), isAuth(false),
     isConnected(false), refCount(1), sendQueue(SendQueue(this)) {
 	ZeroMemory(&recvContext, sizeof(OVERLAPPED_EX));
     ZeroMemory(&sendContext, sizeof(OVERLAPPED_EX));
@@ -76,7 +76,7 @@ void Session::onRecv(int transferredBytes) {
         }
 
         // 3. 온전한 패킷 1개가 완성됨! 핸들러로 전달
-        PacketHandler::dispatch(this, recvBuffer.getReadPtr(), header->size);
+		PacketHandler::dispatch(this, recvBuffer.getReadPtr(), header->size);
 
         // 4. 처리한 패킷 크기만큼 읽기 포인터 이동
         recvBuffer.onRead(header->size);

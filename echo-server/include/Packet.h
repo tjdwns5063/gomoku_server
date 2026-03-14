@@ -1,9 +1,10 @@
-#pragma once
+﻿#pragma once
 
 #include <cstdint>
 #include <unordered_map>
 #include <format>
 #include <iostream>
+#include <functional>
 
 class Session;
 
@@ -55,6 +56,9 @@ struct PKT_C2S_ReqMatch {
 struct PKT_S2C_ResMatch {
 	PacketHeader header;
     StatusCode status;
+    uint8_t matchFlag;
+	uint32_t player1Id;
+    uint32_t player2Id;
 };
 
 #pragma pack(pop)
@@ -62,11 +66,12 @@ struct PKT_S2C_ResMatch {
 class PacketHandler
 {
 private:
-    static std::unordered_map<PacketID, void(*)(Session* session, const char* buffer, size_t size)> handlers;
-    static void addHandler(PacketID id, void(*handler)(Session* session, const char* buffer, size_t size));
+    using HandlerFunc = std::function<void(Session*, const char*, size_t)>;
+    static std::unordered_map<PacketID, HandlerFunc> handlers;
 
 public:
     static void initRoutes();
+    static void addHandler(PacketID id, HandlerFunc handler);
 	static void dispatch(Session* session, const char* buffer, size_t size);
 };
 

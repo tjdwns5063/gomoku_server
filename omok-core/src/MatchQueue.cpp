@@ -1,10 +1,10 @@
 #include "MatchQueue.h"
 
-void MatchQueue::enqueue(Player* session) {
+void MatchQueue::enqueue(Player* player) {
 	{
 		std::lock_guard<std::mutex> guard(lock);
-		session->enterMatchQueue();
-		queue.push_back(session);
+		player->enterMatchQueue();
+		queue.push_back(player);
 	}
 	return;
 }
