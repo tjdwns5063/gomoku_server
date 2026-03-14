@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\AppContainer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\main_back.cpp" />
     <ClCompile Include="src\NetworkEngine.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="src\SessionManager.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\AppContainer.h" />
     <ClInclude Include="include\main.h" />
     <ClInclude Include="include\NetworkEngine.h" />
     <ClInclude Include="include\Packet.h" />
